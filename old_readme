@@ -1,0 +1,10 @@
+#	pdfkit --> converting html to pdf
+#   	to install, execute the following:
+#			apt-get install python-pip
+#			pip install pdfkit
+# 			apt-get install wkhtmltopdf
+#		to use pdfkit with python 3 it might be necessary to execute the following:
+#			cp -r /usr/local/lib/python2.x/dist-packages/pdfkit /usr/local/lib/python3.x/dist-packages/pdfkit
+#		or
+#			cp -r /home/user/.local/lib/python2.x/site-packages/pdfkit /usr/local/lib/python3.x/dist-packages/pdfkt
+#
