@@ -4,7 +4,7 @@ will be created.
 
 INFORMATION:
 	version: v2.3.6
-	date: January 2017
+	date: January 2017 
 
 The tool currently consists of three files: nullify.py, __checking.py and __report.py
 
