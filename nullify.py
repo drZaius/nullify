@@ -8,14 +8,7 @@
 # and pdf) is created, which can optionally be printed.
 ###########################################################################################################################################################
 # The tool consists of three files: nullify.py, __checking.py and __report.py
-###########################################################################################################################################################
-# To use the tool, the following dependencies are necessary:
-# 	lsblk, dd, hdparm, lp, cupds, pdfkit
-#	cups: 
-#	pdfkit:
-#		sudo apt-get install python-pip
-#		sudo pip install pdfkit
-# 		sudo apt-get install wkhtmltopdf
+# Please read the README before use!
 ###########################################################################################################################################################
 ###########################################################################################################################################################
 
@@ -28,9 +21,7 @@ created, which can optionally be printed.
 
 __version__ = '2.3.6'
 __date__ = '"January 2017"'
-__author__ = '"Leonard Eschenbaum"'
-__email__ = '"eschenbaum@digitrace.de"'
-
+__author__ = '"eschenbaum@digitrace.de"'
 
 import time
 from time import localtime
