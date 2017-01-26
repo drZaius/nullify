@@ -31,7 +31,7 @@ def createReport(name, digiTraceID, duration, attributes, index, checked, falseB
 	scriptDir = os.path.dirname(os.path.realpath(__file__))
 	image = scriptDir + '/__DigiTrace_Logo_claim.png'
 
-	print('\033[1m\033[37mCreating report...\033[0m')
+	print('\033[1m\033[37mCreating report...\033[0m') 
 	print
 
 	# check if directory for reports already exists
