@@ -3,8 +3,8 @@ process, the hard drive will be checked to ensure that the process ended success
 will be created.
 
 INFORMATION:
-__version__ = 2.3.6
-__date__ = January 2017
+	version: v2.3.6
+	date: January 2017
 
 The tool currently consists of three files: nullify.py, __checking.py and __report.py
 
@@ -28,6 +28,7 @@ Dependencies:
 
 In order to print the PDF report directy using this tool, the following is necessary. It is assumed that the tool
 is being used on a server with no X server running (e.g., Ubuntu server):
+
 	server:
 		apt-get install cups
 		apt-get install cups-client
