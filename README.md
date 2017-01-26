@@ -3,6 +3,7 @@ process, the hard drive will be checked to ensure that the process ended success
 will be created.
 
 INFORMATION:
+
 	version: v2.3.6
 	date: January 2017 
 
