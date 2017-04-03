@@ -384,7 +384,7 @@ def nulling(device, attributes, index, deviceSize):
 	print("\033[0mChoose nulling type: ")
 	print()
 	print("0 ----> Use block size of 1M for " + str(blocks) + " 1M blocks, and block size of 512 for the\n\tremaining " + str(remaining) + " 512 Byte blocks.")
-	print("1 ----> Use block size of 1M for the whole device (" + str(int(deviceSize / (1024*1024))) + " 1M Byte blocks).")
+	print("1 ----> Use block size of 1M for the whole device (" + str(int(deviceSize / (1024*1024)) + 1) + " 1M Byte blocks).")
 	print("2 ----> Use block size of 512 for the whole device (" + str(int(deviceSize / 512)) + " 512 Byte blocks).")
 	print()
 	while True:
@@ -407,8 +407,7 @@ def nulling(device, attributes, index, deviceSize):
 	print('Starting to null using a block size of ' + bs + ' for ' + str(int(blocks)) + ' blocks (' + str(math.floor(blocksProgress * 100)) + '%)')
 	print()
 	while True:
-		#print('dd if=/dev/zero of=/dev/' + attributes[0][index] + ' bs=' + bs + ' seek=' + str(int(seek)) + ' ' + count)
-		print(shlex.split(cmd))
+		print('dd if=/dev/zero of=/dev/' + attributes[0][index] + ' bs=' + bs + ' seek=' + str(int(seek)) + ' ' + count)
 		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), 'count=' + str(int(blocks))], stderr=PIPE)
 		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), count], stderr=PIPE)
 		dd = Popen(shlex.split(cmd), stderr=PIPE)
