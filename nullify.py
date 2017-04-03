@@ -114,6 +114,7 @@ def main():
 		duration = nulling(diskToNull, attributes, index, deviceSize)
 		print('\033[1m\033[37m###############################################################################')
 		print()
+		
 		restart, falseBlock = modules[1].checkRoutine('/dev/' + attributes[0][index], blocks, whichCheck)
 		if restart == 0 and falseBlock == False:
 			print('/dev/\033[1m\033[37m' + attributes[0][index] + ' \033[0;32mhas been successfully nulled and checked.\033[0m')
@@ -123,8 +124,8 @@ def main():
 			print('/dev/\033[1m\033[37m' + attributes[0][index] + ' \033[0;32mhas been successfully nulled \033[91mBUT NOT CHECKED!\033[0m')
 		elif restart == 1:
 			sys.exit('Program will terminate now.\033[0m')
-		# elif restart == 2:
-		# 	continue
+		elif restart == 2:
+			continue
 
 		# in case the report contains false information about the device, offer the possibility to change it
 		print()
@@ -408,8 +409,6 @@ def nulling(device, attributes, index, deviceSize):
 	print()
 	while True:
 		print('dd if=/dev/zero of=/dev/' + attributes[0][index] + ' bs=' + bs + ' seek=' + str(int(seek)) + ' ' + count)
-		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), 'count=' + str(int(blocks))], stderr=PIPE)
-		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), count], stderr=PIPE)
 		dd = Popen(shlex.split(cmd), stderr=PIPE)
 
 		while dd.poll() is None: # check if child process has terminated
@@ -423,12 +422,8 @@ def nulling(device, attributes, index, deviceSize):
 					try:
 						progress = output.strip() + ' ===> ' + str(math.floor((float(bytesWritten) / int(deviceSize)) * 100)) + '%'
 						print('\033[K' + progress, end='\r') # clear line, then print, then go back to previous line (the line, where just printed to)
-						# stdout.write('\r%s' %progress)
 					except ValueError as ex:
 						print('\033[KError receiving output from dd. Continuing nulling process.', end='\r')
-						# print(ex, '\r')
-						# print('\033[K' + str(ex), end='\r')
-						# stdout.write('\r%s' %ex)
 					break
 		
 		if remaining != 0:
