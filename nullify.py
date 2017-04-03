@@ -19,8 +19,8 @@ process ended successfully. Finally, a report (HTML as well as PDF) will be
 created, which can optionally be printed.
 """
 
-__version__ = '2.3.6'
-__date__ = '"January 2017"'
+__version__ = '2.3.7'
+__date__ = '"April 2017"'
 
 
 import time
@@ -35,6 +35,7 @@ import os
 import distutils.spawn
 import re
 import math
+import shlex
 
 modules = []
 
@@ -213,7 +214,6 @@ def listDevices():
 			serialshdparm.append("could not determine serial")
 			sizesfdisk.append("could not determine size")
 			bytesfdisk.append("could not determine size")
-			# sizes1000hdparm.append("could not determine size")
 			# suppress space between two print statements
 			sys.stdout.softspace = 0
 			# print sdb, sdc etc. in bold white
@@ -234,8 +234,6 @@ def listDevices():
 						match.encode('ascii')
 					except UnicodeEncodeError as e:
 						match = "could not determine model"
-					# if not re.search('^[\w-]{1,}[ ]*[\w-]*', match):
-						# match = "could not determine model"
 					modelshdparm[len(modelshdparm) - 1] = match
 				print(match)
 
@@ -260,13 +258,6 @@ def listDevices():
 									match.encode('ascii')
 								except UnicodeEncodeError as ex:
 									match = "could not determine serial"
-						# if not re.search('^[\w-]{1,}[ ]*[\w-]*', match):
-						# 	match = re.search('(?<=Media Serial Num\:).*', hdparm_output)
-						# 	if match:
-						# 		match = match.group(0).strip()
-						# 		# if it's just garbage, set serial accordingly
-						# 		if not re.search('^[\w-]{1,}[ ]*[\w-]*', match):
-						# 			match = "could not determine serial"
 				# else if output only contains Serial Number
 				elif "Serial Number" in hdparm_output:
 					# extract serial and strip it if it's not None
@@ -278,8 +269,6 @@ def listDevices():
 							match.encode('ascii')
 						except UnicodeEncodeError as e:
 							match = "could not determine serial"
-						# if not re.search('^[\w-]{1,}[ ]*[\w-]*', match):
-							# match = "could not determine serial"
 				# else if output only contains Media Serial Num
 				elif "Media Serial Num" in hdparm_output:
 					# extract serial and stript it if it's not None
@@ -291,8 +280,6 @@ def listDevices():
 							match.encode('ascii')
 						except UnicodeEncodeError as e:
 							match = "could not determine serial"
-						# if not re.search('^[\w-]{1,}[ ]*[\w-]*', match):
-							# match = "could not determine serial"
 				serialshdparm[len(serialshdparm) - 1] = match
 				print(match)
 
@@ -378,7 +365,11 @@ def nulling(device, attributes, index, deviceSize):
 	blocks = 0
 	remaining = 0
 	seek = 0
+	blocksProgress = 1
+	count = ''
 	deviceSize = int(deviceSize)
+
+	cmd = "dd if=/dev/zero of=/dev/" + attributes[0][index] + " bs=" + bs + " seek=" + str(int(seek)) + " " + count
 
 	# if deviceSize can be divided by 1024*1024 (1M) without rest, do only that
 	# otherwise, calculate remaining blocks of size 512
@@ -388,36 +379,40 @@ def nulling(device, attributes, index, deviceSize):
 		remaining = int((deviceSize % (1024*1024)) / 512)
 		blocksProgress = (int(blocks) * 1024*1024) / deviceSize
 
+	# let user choose between three nulling types, if it can't be completely nulled using a block size of 1M
+	nullType = 1 
+	print("\033[0mChoose nulling type: ")
+	print()
+	print("0 ----> Use block size of 1M for " + str(blocks) + " 1M blocks, and block size of 512 for the\n\tremaining " + str(remaining) + " 512 Byte blocks.")
+	print("1 ----> Use block size of 1M for the whole device (" + str(int(deviceSize / (1024*1024))) + " 1M Byte blocks).")
+	print("2 ----> Use block size of 512 for the whole device (" + str(int(deviceSize / 512)) + " 512 Byte blocks).")
+	print()
+	while True:
+		nullType = input('\033[0mInput: \033[1m\033[37m')
+		if not nullType or not re.match("^[0-2]$", nullType) or nullType.isspace():
+			print('\033[91mInvalid input! Please try again.\033[0m')
+		else:
+			break
+	print()
 
-	# let user choose between two nulling types, if it can't be completely nulled using a block size of 1M
-	# make first type default
-	nullType = 0 
-	if remaining != 0:
-		print("\033[0mChoose nulling type: ")
-		print()
-		print("0 ----> Use block size of 1M for " + str(blocks) 	 + " 1M blocks, and block size of 512 for the\n\tremaining " + str(remaining) + " 512 Byte blocks.")
-		print("1 ----> Use block size of 512 for the whole device (" + str(int(deviceSize / 512)) + " 512 Byte blocks).")
-		print()
-		while True:
-			nullType = input('\033[0mInput: \033[1m\033[37m')
-			if not nullType or not re.match("^[0-1]$", nullType) or nullType.isspace():
-				print('\033[91mInvalid input! Please try again.\033[0m')
-			else:
-				break
-		print()
-
-	if nullType == '1':
+	if nullType == '2':
 		blocks = int(deviceSize / 512)
 		remaining = 0
 		bs = '512'
-		blocksProgress = 1
-
+	elif nullType == '1':
+		remaining = 0
+	elif nullType == '0':
+		count = 'count=' + str(int(blocks))
 
 	print('Starting to null using a block size of ' + bs + ' for ' + str(int(blocks)) + ' blocks (' + str(math.floor(blocksProgress * 100)) + '%)')
 	print()
 	while True:
-		print('dd if=/dev/zero of=/dev/' + attributes[0][index] + ' bs=' + bs + ' seek=' + str(int(seek)) + ' count=' + str(int(blocks)))
-		dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), 'count=' + str(int(blocks))], stderr=PIPE)
+		#print('dd if=/dev/zero of=/dev/' + attributes[0][index] + ' bs=' + bs + ' seek=' + str(int(seek)) + ' ' + count)
+		print(shlex.split(cmd))
+		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), 'count=' + str(int(blocks))], stderr=PIPE)
+		#dd = Popen(['dd', 'if=/dev/zero', 'of=/dev/' + attributes[0][index], 'bs=' + bs, 'seek=' + str(int(seek)), count], stderr=PIPE)
+		dd = Popen(shlex.split(cmd), stderr=PIPE)
+
 		while dd.poll() is None: # check if child process has terminated
 			time.sleep(5)
 			dd.send_signal(signal.SIGUSR1)
@@ -455,6 +450,7 @@ def nulling(device, attributes, index, deviceSize):
 			print()
 			print('Continuing to null using a block size of ' + bs + ' for ' + str(int(blocks)) + ' blocks (' + str(math.ceil(blocksProgress * 100)) + '%)')
 			print()
+			cmd = "dd if=/dev/zero of=/dev/" + attributes[0][index] + " bs=" + bs + " seek=" + str(int(seek)) + " " + count
 			remaining = 0
 		else:
 			break
